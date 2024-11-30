@@ -1,0 +1,38 @@
+@Library('sonarqube-shared-library') _
+
+pipeline {
+    agent any
+    environment {
+        CONFIG = config() // Load configuration from shared library
+    }
+    stages {
+        stage('Clone Repository') {
+            steps {
+                script {
+                    org.sonarqube.Clone.call(CONFIG)
+                }
+            }
+        }
+        stage('User Approval') {
+            steps {
+                script {
+                    org.sonarqube.Approval.call()
+                }
+            }
+        }
+        stage('Playbook Execution') {
+            steps {
+                script {
+                    org.sonarqube.PlaybookExecution.call(CONFIG)
+                }
+            }
+        }
+        stage('Notification') {
+            steps {
+                script {
+                    org.sonarqube.Notification.call("SonarQube setup completed successfully.", CONFIG)
+                }
+            }
+        }
+    }
+}
